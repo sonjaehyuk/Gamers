@@ -10,6 +10,17 @@ jobs:
     env:
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
+      - name: Validate DISCORD_WEBHOOK_URL secret
+        shell: bash
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "❌ ERROR: DISCORD_WEBHOOK_URL is not set. Aborting workflow to avoid unnecessary execution."
+            exit 1
+          fi
+          echo "✅ DISCORD_WEBHOOK_URL is properly set. Proceeding with the workflow."
+
       - name: Send Discord notification with embed
         run: |
           EMBED_PAYLOAD=$(cat <<EOF
