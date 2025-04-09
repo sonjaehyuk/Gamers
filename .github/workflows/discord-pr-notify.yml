@@ -28,10 +28,11 @@ jobs:
             "embeds": [{
               "title": "${{ github.event.pull_request.title }}",
               "url": "${{ github.event.pull_request.html_url }}",
-              "description": "새 Pull Request가 생성되었습니다.",
+              "description": "새 Pull Request가 생성되었습니다.\n\n자세히 보기: <${{ github.event.pull_request.html_url }}>",
               "color": 5814783,
               "author": {
-                "name": "${{ github.event.pull_request.user.login }}"
+                "name": "${{ github.event.pull_request.user.login }}",
+                "url": "${{ github.event.pull_request.user.html_url }}"
               },
               "fields": [
                 {
@@ -51,7 +52,7 @@ jobs:
           EOF
           )
 
-          curl -X POST \
+          curl --fail -X POST \
                -H "Content-Type: application/json" \
                -d "$EMBED_PAYLOAD" \
                "$DISCORD_WEBHOOK_URL"
