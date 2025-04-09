@@ -1,0 +1,24 @@
+name: Notify Discord on PR
+
+# pull_request가 열렸을 때만 동작
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send message to Discord
+        run: |
+          PAYLOAD=$(cat <<-EOF
+          {
+            "content": "새 Pull Request가 생성되었습니다!\n제목: ${{ github.event.pull_request.title }}\nURL: ${{ github.event.pull_request.html_url }}"
+          }
+          EOF
+          )
+
+          curl -X POST \
+               -H "Content-Type: application/json" \
+               -d "$PAYLOAD" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
