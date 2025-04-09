@@ -1,6 +1,5 @@
 name: Notify Discord on PR
 
-# pull_request가 열렸을 때만 동작
 on:
   pull_request:
     types: [opened]
@@ -8,17 +7,40 @@ on:
 jobs:
   notify-discord:
     runs-on: ubuntu-latest
+    env:
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
-      - name: Send message to Discord
+      - name: Send Discord notification with embed
         run: |
-          PAYLOAD=$(cat <<-EOF
+          EMBED_PAYLOAD=$(cat <<EOF
           {
-            "content": "새 Pull Request가 생성되었습니다!\n제목: ${{ github.event.pull_request.title }}\nURL: ${{ github.event.pull_request.html_url }}"
+            "embeds": [{
+              "title": "${{ github.event.pull_request.title }}",
+              "url": "${{ github.event.pull_request.html_url }}",
+              "description": "새 Pull Request가 생성되었습니다.",
+              "color": 5814783,
+              "author": {
+                "name": "${{ github.event.pull_request.user.login }}"
+              },
+              "fields": [
+                {
+                  "name": "리포지토리",
+                  "value": "${{ github.repository }}",
+                  "inline": true
+                },
+                {
+                  "name": "작성자",
+                  "value": "${{ github.event.pull_request.user.login }}",
+                  "inline": true
+                }
+              ],
+              "timestamp": "${{ github.event.pull_request.created_at }}"
+            }]
           }
           EOF
           )
 
           curl -X POST \
                -H "Content-Type: application/json" \
-               -d "$PAYLOAD" \
-               ${{ secrets.DISCORD_WEBHOOK_URL }}
+               -d "$EMBED_PAYLOAD" \
+               "$DISCORD_WEBHOOK_URL"
